@@ -1,0 +1,334 @@
+<div class="fullpage">
+  <!-- <div class="headercont">
+    <div class="headerinnercont">
+
+    </div> -->
+  <!-- </div> -->
+  <div class="heropage">
+    <h1>Explore Amazing Products</h1>
+    <p>Where creativity meets luxury</p>
+    <div class="searchwrap">
+
+
+  <!-- <input
+    class="inputcont"
+    type="text"
+    placeholder="Search by product name or category..."
+    [(ngModel)]="searchTerm"
+  />
+  <button class="searchbtn" (click)="search()">Search</button> -->
+
+  <input
+        class="inputcont"
+        type="text"
+        placeholder="Search by product name or category..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+      />
+    </div>
+  </div>
+
+  <div class="brandwrapper">
+    <h2>Our Available Brands</h2>
+    <div class="picwrapper">
+      <div class="imgwrap"></div>
+      <div class="imgwrapper"></div>
+      <div class="imgwrapper2"></div>
+      <div class="imgwrapper3"></div>
+      <div class="imgwrapper4"></div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="headerwrapper">
+      <p>Current product count: {{ products.length }}</p>
+      <div style="display: flex;">
+      <button
+        type="button"
+        style="background-color: blue; color: white"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#exampleModal"
+      >
+        Add product
+      </button>
+      <button class="btn btn-secondary" style="width: 160px;background-color: green; font-size: 15px;" (click)="restoreProducts()">Restore Products</button>
+    </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>SKU</th>
+          <th>Price (#)</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th class="px-4 py-2 text-left">Category</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of filteredProducts; let i = index">
+          <td>{{ product.name }}</td>
+          <td>{{ product.sku }}</td>
+          <td>{{ product.price.toLocaleString() }}</td>
+          <td>{{ product.stock }}</td>
+          <td
+            [ngClass]="{
+              'text-success': product.stock > 5,
+              'text-danger': product.stock < 5,
+              'text-warning': product.stock === 5
+            }"
+          >
+            {{ getStockStatus(product.stock) }}
+          </td>
+          <td class="border px-4 py-2">{{ product.category }}</td>
+          <td>
+            {{
+              product.description.length > 30
+                ? (product.description | slice: 0: 15) + "..."
+                : product.description
+            }}
+          </td>
+          <td>
+
+            <div style="display: flex;">
+            <button
+              type="button"
+              class=""
+              (click)="openDetails(product, i)"
+              data-bs-toggle="modal"
+              data-bs-target="#productDetailsModal"
+              style="width: 110px; height: 35px; font-size: 15px; border-radius: 15px; background-color: white; color: blue; border: 2px solid gray;"
+            >
+              See more
+            </button>
+            <button
+              (click)="deleteProduct(i)"
+              style="width: 100px; background-color: red; color: white; border-radius: 15px;"
+            >
+              Delete
+            </button>
+          </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <div
+    class="modal fade"
+    id="exampleModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog custom-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Create product</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <form
+            #modalForm="ngForm"
+            (ngSubmit)="submitProduct()"
+            autocomplete="off"
+          >
+            <div class="detailwrap">
+              <h5>Category</h5>
+
+              <select
+                name="category"
+                [(ngModel)]="newProduct.category"
+                required
+                style="
+                  width: 90%;
+                  height: 40px;
+                  font-size: 16px;
+                  padding: 5px;
+                  border-radius: 7px;
+                  outline: none;
+                  border: 1px solid gray;
+                  cursor: pointer;
+                "
+              >
+                <option value="" disabled selected>Select a category</option>
+                <option value="Electronics" style="cursor: pointer">
+                  Electronics
+                </option>
+                <option value="Appliances">Appliances</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Furniture">Furniture</option>
+              </select>
+
+              <h5>Product Name</h5>
+              <input
+                type="text"
+                name="name"
+                [(ngModel)]="newProduct.name"
+                required
+              />
+            </div>
+
+            <div class="detailwrap">
+              <h5>SKU</h5>
+              <input
+                type="text"
+                name="sku"
+                [(ngModel)]="newProduct.sku"
+                required
+              />
+            </div>
+
+            <div class="detailwrap">
+              <h5>Price</h5>
+              <input
+                type="number"
+                name="price"
+                [(ngModel)]="newProduct.price"
+                required
+              />
+            </div>
+
+            <div class="detailwrap">
+              <h5>Stock</h5>
+              <input
+                type="number"
+                name="stock"
+                [(ngModel)]="newProduct.stock"
+                required
+              />
+            </div>
+
+            <div class="detailwrap">
+              <h5>Description</h5>
+              <textarea
+                class="decrriptionarea"
+                name="description"
+                [(ngModel)]="newProduct.description"
+              ></textarea>
+            </div>
+
+            <div class="modal-footer">
+              <button
+                type="button"
+                style="
+                  width: 90px;
+                  height: 35px;
+                  font-size: 15px;
+                  background-color: white;
+                  color: blue;
+                  border: 1px solid gray;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                "
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                style="
+                  width: 90px;
+                  height: 35px;
+                  font-size: 15px;
+                  background-color: blue;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                "
+                type="submit"
+                class="addbutton"
+              >
+                Add
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="productDetailsModal"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" style="margin-right: 30px">
+            {{ selectedProduct?.name }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>SKU:</strong> {{ selectedProduct?.sku }}</p>
+
+          <p><strong>Price:</strong> #{{ selectedProduct?.price?.toLocaleString() }}</p>
+
+          <p><strong>Stock:</strong> {{ selectedProduct?.stock }}</p>
+          <p>
+            <strong>Description:</strong> {{ selectedProduct?.description }}
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="deleteSelectedProduct()"
+            data-bs-dismiss="modal"
+            style="
+              width: 90px;
+              height: 35px;
+              font: 13px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              border-radius: 10px;
+            "
+          >
+            Delete
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="editSelectedProduct()"
+            data-bs-dismiss="modal"
+            style="
+              width: 90px;
+              height: 35px;
+              font-size: 15px;
+              background-color: white;
+              color: blue;
+              border: 1px solid gray;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            Edit
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
